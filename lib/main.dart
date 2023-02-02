@@ -2,7 +2,7 @@
  * @Author: haoyi 39499740@qq.com
  * @Date: 2023-02-01 22:07:35
  * @LastEditors: haoyi 39499740@qq.com
- * @LastEditTime: 2023-02-02 16:21:08
+ * @LastEditTime: 2023-02-02 17:06:02
  * @FilePath: /HelloGithub/lib/main.dart
  * @Description: 
  * Bilibili 天国的502
@@ -11,10 +11,14 @@
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hello_github/providers/global_provider.dart';
+import 'package:hello_github/router/delegate.dart';
 import 'package:provider/provider.dart';
+
+MyRouterDelegate delegate = MyRouterDelegate();
 
 void main() {
   runApp(MultiProvider(providers: [
@@ -29,6 +33,10 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  MyApp({Key? key}) : super(key: key) {
+    delegate.push(name: '/');
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveTheme(
@@ -40,64 +48,14 @@ class MyApp extends StatelessWidget {
       ),
       initial: AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp(
-        title: 'Adaptive Theme Demo',
-        theme: theme,
-        darkTheme: darkTheme,
-        home: MyHomePage(title: "123"),
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-    if (_counter % 2 == 0) {
-      AdaptiveTheme.of(context).setLight();
-    } else {
-      AdaptiveTheme.of(context).setDark();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            TextButton(onPressed: () {}, child: Text("123"))
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          title: 'Adaptive Theme Demo',
+          theme: theme,
+          darkTheme: darkTheme,
+          builder: BotToastInit(),
+          home: Router(
+            routerDelegate: delegate,
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          )),
     );
   }
 }
