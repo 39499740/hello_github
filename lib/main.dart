@@ -1,21 +1,27 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true
+    return AdaptiveTheme(
+      light:
+          ThemeData(brightness: Brightness.light, colorSchemeSeed: Colors.blue),
+      dark: ThemeData(
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initial: AdaptiveThemeMode.light,
+      builder: (theme, darkTheme) => MaterialApp(
+        title: 'Adaptive Theme Demo',
+        theme: theme,
+        darkTheme: darkTheme,
+        home: MyHomePage(title: "123"),
+      ),
     );
   }
 }
@@ -36,6 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _counter++;
     });
+    if (_counter % 2 == 0) {
+      AdaptiveTheme.of(context).setLight();
+    } else {
+      AdaptiveTheme.of(context).setDark();
+    }
   }
 
   @override
@@ -55,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            TextButton(onPressed: () {}, child: Text("123"))
           ],
         ),
       ),
