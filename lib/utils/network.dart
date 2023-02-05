@@ -2,7 +2,7 @@
  * @Author: haoyi 39499740@qq.com
  * @Date: 2023-02-02 22:09:08
  * @LastEditors: haoyi 39499740@qq.com
- * @LastEditTime: 2023-02-02 22:38:26
+ * @LastEditTime: 2023-02-05 11:12:29
  * @FilePath: /HelloGithub/lib/utils/network.dart
  * @Description: 
  * Bilibili 天国的502
@@ -29,17 +29,14 @@ class Network {
   }
 
   Future<Response?> get(String path, Map<String, dynamic> body) async {
-    BotToast.showLoading();
     try {
       Response res = await dio.get(
         path,
         queryParameters: body,
       );
-      BotToast.closeAllLoading();
+
       return res;
     } on DioError catch (e) {
-      BotToast.closeAllLoading();
-
       if (e.response != null) {
         return e.response;
       }

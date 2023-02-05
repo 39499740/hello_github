@@ -2,7 +2,7 @@
  * @Author: haoyi 39499740@qq.com
  * @Date: 2023-02-02 17:18:59
  * @LastEditors: haoyi 39499740@qq.com
- * @LastEditTime: 2023-02-05 01:31:50
+ * @LastEditTime: 2023-02-05 20:26:34
  * @FilePath: /HelloGithub/lib/pages/home/home/provider.dart
  * @Description: 
  * Bilibili 天国的502
@@ -11,8 +11,10 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 
 import 'package:flutter/material.dart';
+import 'package:hello_github/main.dart';
 
 import 'package:hello_github/models/listItemModel.dart';
 import 'package:hello_github/providers/global_provider.dart';
@@ -35,16 +37,19 @@ class HomeProvider extends ChangeNotifier {
   final List<ListItemModel> _itemList = [];
   List<ListItemModel> get itemList => _itemList;
 
-  int _pageNum = 1;
+  final EasyRefreshController _easyRefreshController = EasyRefreshController();
+  EasyRefreshController get easyRefreshController => _easyRefreshController;
 
-  bool _noMore = false;
-  bool get noMore => _noMore;
+  int _pageNum = 1;
 
   int _sortIndex = 0;
   int get sortIndex => _sortIndex;
 
   String _tag = "";
   String get tag => _tag;
+
+  bool _isSearch = false;
+  bool get isSearch => _isSearch;
 
   void init() {
     if (!_initialized) {
@@ -55,7 +60,24 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getList() async {
+  void searchList() async {
+    Response? res = await network
+        .get("search/", {"q": searchController.text, "page": _pageNum});
+    if (res != null) {
+      res.data["data"].forEach((v) {
+        _itemList.add(ListItemModel.fromJson(v));
+      });
+      if ((res.data["data"] as List).isEmpty) {
+        BotToast.showText(text: "没有更多了");
+      }
+      _pageNum++;
+      notifyListeners();
+    } else {
+      BotToast.showText(text: "网络错误");
+    }
+  }
+
+  void getList() async {
     Response? res = await network.get("", {
       "tid": tag,
       "page": _pageNum.toString(),
@@ -65,6 +87,9 @@ class HomeProvider extends ChangeNotifier {
       res.data["data"].forEach((v) {
         _itemList.add(ListItemModel.fromJson(v));
       });
+      if ((res.data["data"] as List).isEmpty) {
+        BotToast.showText(text: "没有更多了");
+      }
       _pageNum++;
       notifyListeners();
     } else {
@@ -75,19 +100,34 @@ class HomeProvider extends ChangeNotifier {
   Future<void> refresh() async {
     _itemList.clear();
     _pageNum = 1;
-    await getList();
+    if (_isSearch) {
+      searchList();
+    } else {
+      getList();
+    }
   }
 
   Future<void> getMore() async {
-    await getList();
+    getList();
   }
 
   void onSubmitted(String value) {
-    print(value);
+    _isSearch = true;
+    _pageNum = 1;
+    notifyListeners();
+    refresh();
   }
 
-  void onItemClicked(ListItemModel model) {
-    print("aaa");
+  void closeSearch() {
+    _isSearch = false;
+    _pageNum = 1;
+    notifyListeners();
+    refresh();
+  }
+
+  void onItemClicked(int index) {
+    delegate.push(
+        name: "projDetail", arguments: {"itemId": _itemList[index].itemId});
   }
 
   void onSortChanged(int value) {
@@ -98,16 +138,9 @@ class HomeProvider extends ChangeNotifier {
 
   void selectTag() async {
     GlobalProvider gp = Provider.of<GlobalProvider>(context, listen: false);
-
     int? result = await showModalActionSheet<int>(
         context: context,
         materialConfiguration: const MaterialModalActionSheetConfiguration(),
-        // actions: [
-        //   const SheetAction(label: "全部", key: 0),
-        //   ...gpp.tagList
-        //       .map((e) => SheetAction(label: e.name!, key: e.rank!))
-        //       .toList()
-        // ],
         actions: List.generate(gp.tagList.length + 1, (index) {
           if (index == 0) {
             return const SheetAction(label: "全部", key: 0);

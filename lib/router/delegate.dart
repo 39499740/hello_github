@@ -2,7 +2,7 @@
  * @Author: haoyi 39499740@qq.com
  * @Date: 2023-02-02 16:25:48
  * @LastEditors: haoyi 39499740@qq.com
- * @LastEditTime: 2023-02-02 17:04:48
+ * @LastEditTime: 2023-02-05 20:23:10
  * @FilePath: /HelloGithub/lib/router/delegate.dart
  * @Description: 路由文件 Navigator2.0
  * Bilibili 天国的502
@@ -11,6 +11,7 @@
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:hello_github/pages/detail/projDetail/view.dart';
 
 import '../pages/tab/tab/view.dart';
 
@@ -108,6 +109,11 @@ class MyRouterDelegate extends RouterDelegate<List<RouteSettings>>
     switch (routeSettings.name) {
       case '/':
         child = TabPage();
+        break;
+      case "/projDetail":
+        child = ProjDetailPage(
+          itemId: argument!['itemId'],
+        );
         break;
       default:
         child = Scaffold();

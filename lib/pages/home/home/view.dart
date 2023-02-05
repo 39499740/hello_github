@@ -2,15 +2,14 @@
  * @Author: haoyi 39499740@qq.com
  * @Date: 2023-02-02 17:18:59
  * @LastEditors: haoyi 39499740@qq.com
- * @LastEditTime: 2023-02-05 01:23:30
+ * @LastEditTime: 2023-02-05 19:30:41
  * @FilePath: /HelloGithub/lib/pages/home/home/view.dart
  * @Description: 
  * Bilibili 天国的502
  * Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
  */
-import 'package:cool_dropdown/cool_dropdown.dart';
-import 'package:easy_refresh/easy_refresh.dart';
 
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screen_scaling/flutter_screen_scaling.dart';
 import 'package:hello_github/pages/home/component/homeListItem.dart';
@@ -47,7 +46,7 @@ class HomePage extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    padding: EdgeInsets.only(left: 110.w),
+                    padding: EdgeInsets.only(left: 110.w, right: 20.w),
                     width: double.infinity,
                     height: 110.w,
                     child: Row(
@@ -83,17 +82,35 @@ class HomePage extends StatelessWidget {
                   ),
                   Expanded(
                       child: EasyRefresh(
-                    header: const BezierHeader(),
-                    footer: const BezierFooter(),
+                    // header: const BezierHeader(),
+                    // footer: const BezierFooter(),
+                    header: const ClassicHeader(
+                        dragText: "下拉刷新",
+                        armedText: "松开刷新",
+                        processingText: "正在刷新",
+                        processedText: "刷新完成",
+                        failedText: "刷新失败",
+                        messageText: "更新于 %T",
+                        readyText: "正在刷新"),
+                    footer: const ClassicFooter(
+                        dragText: "上拉加载",
+                        armedText: "松开加载",
+                        processingText: "正在加载",
+                        processedText: "加载完成",
+                        failedText: "加载失败",
+                        noMoreText: "没有更多了",
+                        messageText: "更新于 %T",
+                        readyText: "正在加载"),
                     onRefresh: () async => {await p.refresh()},
                     onLoad: () async => {await p.getMore()},
+
                     child: ListView.builder(
                       itemCount: pp.itemList.length,
                       itemBuilder: (context, index) {
                         return HomeListItem(
                             model: pp.itemList[index],
                             onTap: () {
-                              p.onItemClicked(pp.itemList[index]);
+                              p.onItemClicked(index);
                             });
                       },
                     ),
@@ -103,17 +120,14 @@ class HomePage extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
       floatingActionButton: SearchBarAnimation(
         textEditingController: pp.searchController,
+        hintText: "搜索开源项目",
         isOriginalAnimation: true,
         enableKeyboardFocus: true,
-        onExpansionComplete: () {
-          debugPrint('do something just after searchbox is opened.');
-        },
-        onCollapseComplete: () {
-          debugPrint('do something just after searchbox is closed.');
-        },
-        onPressButton: (isSearchBarOpens) {
-          debugPrint(
-              'do something before animation started. It\'s the ${isSearchBarOpens ? 'opening' : 'closing'} animation');
+        onPressButton: (isOpen) {
+          if (!isOpen && pp.isSearch) {
+            p.closeSearch();
+            p.searchController.text = "";
+          }
         },
         trailingWidget: Image.asset(
           R.assetsImagesLogo,
@@ -135,13 +149,6 @@ class HomePage extends StatelessWidget {
           pp.onSubmitted(value);
         },
       ),
-    );
-  }
-
-  Widget _typeButton(String title, int index, HomeProvider p, HomeProvider pp) {
-    return Container(
-      margin: EdgeInsets.only(left: 10.w),
-      child: ElevatedButton(child: Text(title), onPressed: () {}),
     );
   }
 }
